@@ -10,9 +10,17 @@ body {
     color: rgb(255, 255, 255);
 }
 
-h1{
+h1 {
     text-align: center;
 }
+
+#sort {
+    display: block;
+    margin: 0.5rem auto;
+    padding: 0.4rem;
+    border-radius: 0.25rem;
+}
+
 #todoList {
     min-width: 50vw;
     min-height: 75vh;
@@ -71,23 +79,36 @@ h1{
     color: greenyellow;
     text-decoration: line-through;
 }
-#footer{
+
+#footer {
     padding: 2rem;
     background-color: black;
     text-align: center;
 }
 
+svg {
+    width: 2.5rem;
+    vertical-align: middle;
+    fill: white;
+}
+
 @media (max-width: 900px) and (min-width: 200px) {
-    #newTodo{
+    #newTodo {
         min-width: 60vw;
     }
-    #addTodo{
+
+    #addTodo {
         display: block;
         margin: auto;
         margin-top: 0.7rem;
         margin-bottom: 1.25rem;
     }
-    .todo-text{
-        font-size: larger;
+
+    #todoList {
+        width: 75vw;
+    }
+
+    .todo-text {
+        font-size: medium;
     }
 }
