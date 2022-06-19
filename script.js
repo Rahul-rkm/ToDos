@@ -1,124 +1,150 @@
-// select all the elements required for adding and deleting
-// todoList, todo-item , form , addTodo , newTodo
+// selecting static elements with dynamic data :  input, todoList, form
+const inputTodo = document.querySelector("#newTodo");
 const todoList = document.querySelector("#todoList");
-const todoItems = document.querySelectorAll(".todo-item");
-const done = document.querySelectorAll('.done');
-const deleteEl = document.querySelectorAll(".delete");
-const form = document.querySelector("#form");
-const newTodo = document.querySelector("#newTodo");
-const addTodo = document.querySelector("#addTodo");
+const form = document.querySelector("form");
+const submitBtn = document.querySelector("#addTodo");
+const sortBy = document.querySelector("#sort");
 
-// adding local storage functionality
-const todoListArray = localStorage.todosList ? JSON.parse(localStorage.todosList) : [];
+// LOCAL STORAGE Data structure looks like this : 👇
+// localStorage.todosList = [{'text':'todo text', 'completed': true}]
 
-if (localStorage.todosList) {
-    todoListArray.forEach(item => {
-        // creating elements for new todo item
-        const newItem = document.createElement('div');
-        const newChkBox = document.createElement('input');
-        const newTodoText = document.createElement('div');
-        const newCloseBtn = document.createElement('button');
-        // setting attributes and classes
-        newItem.classList.add('todo-item');
-        newChkBox.classList.add('done');
-        newChkBox.setAttribute('type', 'checkbox');
-        newTodoText.classList.add('todo-text');
-        newCloseBtn.classList.add('delete');
-        newCloseBtn.innerHTML = "&times;";
+/*
+1. define functions to add strikethrough, delete, add and select functionality
+*/
 
-        // putting todo text value
-        newTodoText.innerText = item;
 
-        // adding event listeners
-        newChkBox.addEventListener('mouseover', (e) => {
-            e.target.nextElementSibling.classList.toggle('almost-done');
-        })
-        newChkBox.addEventListener('mouseleave', (e) => {
-            e.target.nextElementSibling.classList.toggle('almost-done');
-        })
+function mountNewTodoItem(isComplete, fromLocalStorage) {
 
-        newChkBox.addEventListener('click', (e) => {
-            e.target.nextElementSibling.classList.toggle('completed');
-        })
+    // 1) create a new todo '.todo-item' item containing
+    const newTodoItem = document.createElement('div');
+    newTodoItem.classList.add('todo-item');
+    if (isComplete) newTodoItem.classList.add('complete');
 
-        newCloseBtn.addEventListener('click', (e) => {
-            // removing from todoListArray
-            todoListArray.splice(todoListArray.indexOf(e.target.previousElementSibling), 1);
-            // updating in localStorage
-            localStorage.setItem('todosList', JSON.stringify(todoListArray));
-            e.target.parentNode.remove();
-        })
-        // nesting the elements inside the todo item
-        newItem.append(newChkBox, newTodoText, newCloseBtn);
-        todoList.append(newItem);
-    })
+    //    -> 1 checkbox '.done' with strikethrough ✔,
+    const newCheckbox = document.createElement('input');
+    newCheckbox.classList.add('done');
+    newCheckbox.setAttribute('type', 'checkbox');
+    // STRIKETHROUGH AND COMPLETED functionality
+    newCheckbox.addEventListener('mouseover', strikethroughMouseoverHandler);
+    newCheckbox.addEventListener('mouseleave', strikethroughMouseleaveHandler);
+    newCheckbox.addEventListener('click', completeHandler);
+    if (isComplete) newCheckbox.checked = true;
+
+
+    //    -> 1 div with text '.todo-text'✔,
+    const newTodoText = document.createElement('div');
+    newTodoText.innerText = inputTodo.value;
+    newTodoText.classList.add('todo-text');
+    const newItemObj = { 'text': inputTodo.value, 'completed': false };
+    inputTodo.value = '';
+    if (isComplete) {
+        newTodoText.classList.add('completed');
+        newItemObj.completed = true;
+    }
+    // if loading from localStorage we will not add the same items again to array and localStorage.
+    if (!fromLocalStorage) {
+        todoListArray.push(newItemObj);
+        localStorage.setItem('todosList', JSON.stringify(todoListArray))
+    }
+    //    -> 1 button &times '.delete'✔; 
+    const newDelBtn = document.createElement('button');
+    newDelBtn.innerHTML = '&times;'
+    newDelBtn.classList.add('delete');
+    // adding DELETE functionality
+    newDelBtn.addEventListener('click', deleteHandler);
+
+    // append the todo item after composing it
+    newTodoItem.append(newCheckbox, newTodoText, newDelBtn);
+    todoList.append(newTodoItem);
 }
 
 
-// adding strikethrough to the todo-text : FOR EACH todo-item
-done.forEach(el => {
-    el.addEventListener('mouseover', (e) => {
-        e.target.nextElementSibling.classList.toggle('almost-done');
-    })
-    el.addEventListener('mouseleave', (e) => {
-        e.target.nextElementSibling.classList.toggle('almost-done');
-    })
 
-    el.addEventListener('click', (e) => {
-        e.target.nextElementSibling.classList.toggle('completed');
-    })
-})
+// add, delete, strikethrough, select 
+// defining addTodo functionality
+function addTodoHandler(e) {
+    e.preventDefault()
+    mountNewTodoItem(false, false);
 
-// adding ability to delete todo-items with delete button : FOR EACH
-deleteEl.forEach(el => {
-    el.addEventListener('click', (e) => {
-        e.target.parentNode.remove();
-    })
-})
+}
 
-// ability to create new todo to the list
-addTodo.addEventListener('click', (e) => {
-    e.preventDefault();
-    // creating elements for new todo item
-    const newItem = document.createElement('div');
-    const newChkBox = document.createElement('input');
-    const newTodoText = document.createElement('div');
-    const newCloseBtn = document.createElement('button');
-    // setting attributes and classes
-    newItem.classList.add('todo-item');
-    newChkBox.classList.add('done');
-    newChkBox.setAttribute('type', 'checkbox');
-    newTodoText.classList.add('todo-text');
-    newCloseBtn.classList.add('delete');
-    newCloseBtn.innerHTML = "&times;";
-    // set todoText value
-    newTodoText.innerText = newTodo.value;
-    // storing in localStorage
-    todoListArray.push(newTodo.value);
+// adding ADDTODO functionality
+form.addEventListener('submit', addTodoHandler);
+
+// Defining DELETE function
+function deleteHandler(e) {
+    const text = e.target.previousElementSibling.innerText;
+    // const targetTodoObj = todoListArray.find((item)=> item['text']===text);
+    let newObj = todoListArray.find((item) => item['text'] === text);
+    let index = todoListArray.indexOf(newObj);
+    todoListArray.splice(index, 1);
     localStorage.setItem('todosList', JSON.stringify(todoListArray));
-    newTodo.value = '';
+    e.target.parentNode.remove();
+}
 
-    // adding event listeners
-    newChkBox.addEventListener('mouseover', (e) => {
-        e.target.nextElementSibling.classList.toggle('almost-done');
-    })
-    newChkBox.addEventListener('mouseleave', (e) => {
-        e.target.nextElementSibling.classList.toggle('almost-done');
-    })
+// Defining STRIKETHROUGH functionality by set of functions
+function strikethroughMouseoverHandler(e) {
+    e.target.nextElementSibling.classList.toggle('almost-done');
+}
+function strikethroughMouseleaveHandler(e) {
+    e.target.nextElementSibling.classList.toggle('almost-done');
+}
+function completeHandler(e) {
+    e.target.nextElementSibling.classList.toggle('completed');
+    e.target.parentNode.classList.toggle('complete');
+    const text = e.target.nextElementSibling.innerText;
+    // updating the complete attribute in local storage
+    let targetTodoObj = todoListArray.find(item => item['text'] === text);
+    if (targetTodoObj['completed'])
+        targetTodoObj['completed'] = false;
+    else
+        targetTodoObj['completed'] = true;
 
-    newChkBox.addEventListener('click', (e) => {
-        e.target.nextElementSibling.classList.toggle('completed');
-    })
+    localStorage.setItem('todosList', JSON.stringify(todoListArray));
 
-    newCloseBtn.addEventListener('click', (e) => {
-        // removing from todoListArray
-        todoListArray.splice(todoListArray.indexOf(e.target.previousElementSibling), 1);
-        // updating in localStorage
-        localStorage.setItem('todosList', JSON.stringify(todoListArray));
-        e.target.parentNode.remove();
-    })
-    // nesting the elements inside the todo item
-    newItem.append(newChkBox, newTodoText, newCloseBtn);
-    todoList.append(newItem);
+}
 
+
+/*
+2. load all the todos from todoList from localstorage 
+*/
+
+const todoListArray = localStorage.todosList ? JSON.parse(localStorage.todosList) : [];
+
+// LOADING TODOS FROM 
+todoListArray.forEach((item) => {
+    inputTodo.value = item['text'];
+    mountNewTodoItem(item.completed, true);
+})
+
+
+// SORTING FUNCTIONALITY
+sortBy.addEventListener('change', () => {
+    let completeTodosArray = todoListArray.filter(item => item['completed']);
+    let incompleteTodosArray = todoListArray.filter(item => !item['completed']);
+    let sort = sortBy.value;
+
+    switch (sort) {
+        case 'all':
+            todoList.innerHTML = '';
+            todoListArray.forEach((item) => {
+                inputTodo.value = item['text'];
+                mountNewTodoItem(item.completed, true);
+            })
+            break;
+        case 'completed':
+            todoList.innerHTML = '';
+            completeTodosArray.forEach((item) => {
+                inputTodo.value = item['text'];
+                mountNewTodoItem(item.completed, true);
+            })
+            break;
+        case 'pending':
+            todoList.innerHTML = '';
+            incompleteTodosArray.forEach((item) => {
+                inputTodo.value = item['text'];
+                mountNewTodoItem(item.completed, true);
+            })
+            break;
+    }
 })
