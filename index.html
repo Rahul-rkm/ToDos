@@ -5,8 +5,12 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="black">
+    <link rel="apple-touch-icon" href="/icons/apple-icon-180.png">
     <link rel="shortcut icon" href="images/logo.png" type="image/x-icon">
+    <!-- <a href="https://www.flaticon.com/free-icons/tick" title="tick icons">Tick icons created by Roundicons - Flaticon</a> -->
     <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
     <script defer src="./script.js"></script>
 
     <title>Todo</title>
@@ -39,6 +43,11 @@
             </svg>
         </a>
     </div>
+    <script>
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("./service_worker.js");
+        }
+    </script>
 </body>
 
 </html>
