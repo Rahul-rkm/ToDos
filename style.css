@@ -26,7 +26,7 @@ h1 {
     min-height: 75vh;
     width: fit-content;
     margin: 1rem;
-    margin: auto;
+    margin: 2rem auto;
 }
 
 .todo-item {
